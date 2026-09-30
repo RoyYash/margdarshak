@@ -37,20 +37,21 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-### Flask web app
+### Full website (same app as Vercel)
 
 ```bash
 python app.py
 ```
 
 Open `http://localhost:5000`. The API endpoint is `POST /api/optimize`.
+This is the same Flask website served at the Vercel deployment URL.
 
 ### Streamlit dashboard
 
 Run this in a separate terminal:
 
 ```bash
-python -m streamlit run routepulse_streamlit.py
+python -m streamlit run streamlit_app.py
 ```
 
 Open `http://localhost:8501`. The demo login is `admin` / `admin123`.
