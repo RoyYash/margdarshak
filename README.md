@@ -28,9 +28,9 @@ Python 3.10+ recommended.
 pip install -r requirements.txt
 python app.py
 ```
-
-Open:
-http://127.0.0.1:5000
+## admin id & password (for demo use)
+email: admin
+password:admin123
 
 Run the Streamlit traffic-management dashboard in a separate terminal:
 
