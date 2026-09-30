@@ -24,36 +24,47 @@ from vehicle_simulation import (
 )
 
 st.set_page_config(page_title="MARGDARSHAK", page_icon="🧭", layout="wide", initial_sidebar_state="expanded")
+
+# ── Auth guard: check BEFORE any CSS so the correct theme fires first ──
 if not st.session_state.get("is_authenticated", False):
+    # Login-page CSS (dark) — only injected when user is NOT logged in
     st.markdown("""
     <style>
-    [data-testid="stAppViewContainer"]{
+    html, body, [data-testid="stAppViewContainer"],
+    [data-testid="stMain"], [data-testid="stMainBlockContainer"] {
         min-height:100vh;
         background:
             radial-gradient(ellipse at 18% 12%,rgba(34,111,179,.28),transparent 38%),
             radial-gradient(ellipse at 85% 90%,rgba(27,150,178,.16),transparent 36%),
             repeating-linear-gradient(0deg,transparent 0,transparent 47px,rgba(138,193,228,.035) 48px),
             repeating-linear-gradient(90deg,transparent 0,transparent 47px,rgba(138,193,228,.035) 48px),
-            linear-gradient(135deg,#071321,#0b2035 55%,#081725);
+            linear-gradient(135deg,#071321,#0b2035 55%,#081725) !important;
     }
-    [data-testid="stHeader"],[data-testid="stSidebar"],[data-testid="stFooter"]{display:none}
-    .block-container{max-width:100%;min-height:100vh;padding:2rem 1rem;display:flex;flex-direction:column;justify-content:center}
-    [data-testid="stVerticalBlockBorderWrapper"]>div{
+    [data-testid="stHeader"],[data-testid="stAppHeader"],
+    [data-testid="stSidebar"],[data-testid="stFooter"],
+    [data-testid="stBottom"]{display:none !important}
+    .block-container,.stMainBlockContainer,.stMain > div{
+        max-width:100%;min-height:100vh;padding:2rem 1rem;
+        display:flex;flex-direction:column;justify-content:center;
+        background:transparent !important;
+    }
+    [data-testid="stVerticalBlockBorderWrapper"]>div,
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] > div {
         border:1px solid rgba(147,192,226,.24);
         border-radius:22px;
-        background:rgba(11,28,46,.84);
+        background:rgba(11,28,46,.84) !important;
         box-shadow:0 24px 80px rgba(0,0,0,.38);
         backdrop-filter:blur(16px);
     }
     .login-brand{text-align:center;color:#f4f8ff;font-size:2rem;font-weight:750;letter-spacing:-.04em}
     .login-subtitle{text-align:center;color:#adc1d4;font-size:.9rem;margin:.25rem 0 1.4rem}
-    [data-testid="stAppViewContainer"] h2{color:#f4f8ff;text-align:center;margin:.5rem 0 1rem}
-    [data-testid="stAppViewContainer"] label,[data-testid="stAppViewContainer"] p{color:#d3e1ee}
-    [data-testid="stTextInput"] input{background:rgba(5,17,30,.72);border:1px solid #35516a;border-radius:10px;color:#f4f8ff}
+    h2{color:#f4f8ff !important;text-align:center;margin:.5rem 0 1rem}
+    label, p, .stMarkdown p {color:#d3e1ee !important}
+    [data-testid="stTextInput"] input{background:rgba(5,17,30,.72) !important;border:1px solid #35516a;border-radius:10px;color:#f4f8ff !important}
     [data-testid="stTextInput"] input:focus{border-color:#43b9dc;box-shadow:0 0 0 1px #43b9dc}
     [data-testid="stFormSubmitButton"] button{
         width:100%;min-height:2.8rem;border:1px solid rgba(100,204,239,.35);border-radius:11px;
-        background:linear-gradient(105deg,#2868cf,#159cb9);color:white;font-weight:700;
+        background:linear-gradient(105deg,#2868cf,#159cb9) !important;color:white !important;font-weight:700;
         transition:transform .16s ease,box-shadow .16s ease;
     }
     [data-testid="stFormSubmitButton"] button:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(24,150,197,.28)}
@@ -74,7 +85,7 @@ if not st.session_state.get("is_authenticated", False):
             with st.form("margdarshak_login"):
                 username = st.text_input("Username / Email", key="login_username")
                 password = st.text_input("Password", type="password", key="login_password")
-                submitted = st.form_submit_button("🔐 Login", width="stretch")
+                submitted = st.form_submit_button("🔐 Login", use_container_width=True)
             st.markdown("---")
             st.markdown(
                 '<div class="login-demo"><strong>Demo Login</strong><br>'
@@ -85,16 +96,40 @@ if not st.session_state.get("is_authenticated", False):
                 if username.strip() == "admin" and password == "admin123":
                     st.session_state.is_authenticated = True
                     st.rerun()
-                st.error("❌ Invalid username or password")
+                else:
+                    # Only show error when credentials are WRONG (not on success)
+                    st.error("❌ Invalid username or password")
     st.stop()
+
+# ── Dashboard CSS (light) — only injected after successful login ──
 
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"]{background:#f4f8f8}[data-testid="stSidebar"]{background:#eef7f7}
-.block-container{max-width:1500px;padding-top:1.3rem}.rp-kicker{color:#117f88;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
-.rp-hero h1{color:#193642;font-size:2.15rem;margin:.25rem 0}[data-testid="stMetric"]{background:#fff;border:1px solid #d7e6e6;border-left:3px solid #16818a;border-radius:6px;padding:.8rem 1rem}
+/* ── Prevent white flash on EVERY rerun ── */
+html, body {
+    background-color: #f4f8f8 !important;
+}
+/* ── Main containers (Streamlit 1.57–1.64+ selectors) ── */
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"],
+.stApp {
+    background-color: #f4f8f8 !important;
+    transition: none !important;
+}
+[data-testid="stSidebar"] { background: #eef7f7 !important; }
+/* ── Prevent iframe / component white flash ── */
+iframe { background: transparent !important; }
+/* ── Layout ── */
+.block-container { max-width:1500px; padding-top:1.3rem; }
+.rp-kicker { color:#117f88; font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+.rp-hero h1 { color:#193642; font-size:2.15rem; margin:.25rem 0; }
+[data-testid="stMetric"] { background:#fff; border:1px solid #d7e6e6; border-left:3px solid #16818a; border-radius:6px; padding:.8rem 1rem; }
+/* ── Spinner overlay (keep bg consistent during heavy compute) ── */
+[data-testid="stSpinner"] > div { background: rgba(244,248,248,0.9) !important; }
 </style>
 """, unsafe_allow_html=True)
+
 
 CITY = {"name": "Bengaluru, Karnataka", "center": (12.9716, 77.5946)}
 # Replace these sample GPS points with real depot/customer coordinates when available.
@@ -459,24 +494,37 @@ def simulate(stops,vehicles,capacity,vehicle_type,traffic,iterations,seed,incide
     return {"nodes":nodes,"edges":edges,"routes":routes,"convergence":convergence,"runtime_ms":runtime,"metrics":flatten_metrics(routes,edges,nodes),"baseline_routes":greedy_baseline(nodes,edges,stops,vehicles),"affected":affected}
 
 
+
+# ── Sidebar (top-level, NO @st.fragment — fragment causes sidebar to render in main page area) ──
 with st.sidebar:
-    st.title("🧭 MARGDARSHAK");st.caption("Smart Traffic & Route Guidance System")
-    vehicles=st.slider("Number of vehicles",1,6,3)
-    vehicle_type=st.selectbox("Vehicle type (applies to fleet)",list(VEHICLE_PROFILES))
-    vehicle_profile=VEHICLE_PROFILES[vehicle_type]
+    st.title("🧭 MARGDARSHAK")
+    st.caption("Smart Traffic & Route Guidance System")
+    vehicles = st.slider("Number of vehicles", 1, 6, 3)
+    vehicle_type = st.selectbox("Vehicle type (applies to fleet)", list(VEHICLE_PROFILES))
+    vehicle_profile = VEHICLE_PROFILES[vehicle_type]
     if st.session_state.get("capacity_vehicle_type") != vehicle_type:
-        st.session_state.capacity_vehicle_type=vehicle_type
-        st.session_state.vehicle_capacity=vehicle_profile["capacity"]
-    capacity=st.slider("Capacity per vehicle (parcels)",1,vehicle_profile["capacity"],key="vehicle_capacity")
+        st.session_state.capacity_vehicle_type = vehicle_type
+        st.session_state.vehicle_capacity = vehicle_profile["capacity"]
+    capacity = st.slider("Capacity per vehicle (parcels)", 1, vehicle_profile["capacity"], key="vehicle_capacity")
     st.caption(f"{vehicle_type}: up to {vehicle_profile['capacity']} parcels · speed factor {vehicle_profile['speed_factor']:.2f}×")
-    stops=st.slider("Delivery locations",8,22,12)
-    traffic=st.selectbox("Traffic profile",["Low","Normal","Rush Hour","Extreme"],index=2);seed=st.number_input("Random seed",1,9999,42);iterations=st.selectbox("QPSO iterations",[30,60,100],index=1)
-    use_osrm=st.checkbox("Use OSRM road geometry",value=True,help="Falls back to sample routes if public OSRM is unavailable.")
-    run_qpso=st.button("Run QPSO Route Optimization",type="primary",width="stretch")
+    stops = st.slider("Delivery locations", 8, 22, 12)
+    traffic = st.selectbox("Traffic profile", ["Low", "Normal", "Rush Hour", "Extreme"], index=2)
+    seed = st.number_input("Random seed", 1, 9999, 42)
+    iterations = st.selectbox("QPSO iterations", [30, 60, 100], index=1)
+    use_osrm = st.checkbox("Use OSRM road geometry", value=True,
+                           help="Falls back to sample routes if public OSRM is unavailable.")
+    run_qpso = st.button("Run QPSO Route Optimization", type="primary", use_container_width=True)
+
+# Run simulation on button click or first load (simulate() is @st.cache_data — fast on re-runs)
 if run_qpso or "scenario" not in st.session_state:
     with st.spinner("Simulating traffic and optimizing routes..."):
-        st.session_state.scenario=simulate(stops,vehicles,capacity,vehicle_type,traffic,iterations,int(seed));st.session_state.pop("after",None);st.session_state.map_rev=st.session_state.get("map_rev",0)+1
-scenario=st.session_state.scenario;active=st.session_state.get("after",scenario);metric=active["metrics"]
+        st.session_state.scenario = simulate(stops, vehicles, capacity, vehicle_type, traffic, iterations, int(seed))
+        st.session_state.pop("after", None)
+        st.session_state.map_rev = st.session_state.get("map_rev", 0) + 1
+
+scenario = st.session_state.scenario
+active = st.session_state.get("after", scenario)
+metric = active["metrics"]
 st.session_state.setdefault("vehicle_simulation", None)
 
 st.markdown('<div class="rp-kicker">Operations control center</div><div class="rp-hero"><h1>🧭 MARGDARSHAK</h1><p>Smart Traffic &amp; Route Guidance System</p></div>',unsafe_allow_html=True)
@@ -484,194 +532,156 @@ with st.container(horizontal=True):
     st.metric("Delivery demand",f"{stops} locations",border=True);st.metric("Fleet capacity",f"{vehicles*capacity} parcels",border=True);st.metric("Optimized distance",f"{metric['distance']:.2f} km",border=True);st.metric("Estimated trip cost",f"₹{metric['distance']*RUPEES_PER_KM:.2f}",f"₹{RUPEES_PER_KM}/km",border=True)
 
 st.header("🚗 Vehicle Route Simulation")
-simulation_type = st.selectbox(
-    "Vehicle Type",
-    ["2-Wheeler", "3-Wheeler", "Heavy Vehicle"],
-    key="simulation_vehicle_type",
-)
-location_options = list(range(min(stops, len(scenario["nodes"]) - 1) + 1))
-location_labels = {node: name(node, stops) for node in location_options}
-if st.session_state.get("simulation_start") not in location_options:
-    st.session_state["simulation_start"] = location_options[0]
-start_col, destination_col = st.columns(2)
-with start_col:
-    simulation_start = st.selectbox(
-        "Start",
-        location_options,
-        format_func=lambda node: location_labels[node],
-        key="simulation_start",
-    )
-destination_options = [node for node in location_options if node != simulation_start]
-if st.session_state.get("simulation_destination") not in destination_options:
-    st.session_state["simulation_destination"] = destination_options[0]
-with destination_col:
-    simulation_destination = st.selectbox(
-        "Destination",
-        destination_options,
-        format_func=lambda node: location_labels[node],
-        key="simulation_destination",
-    )
-control_col, speed_col = st.columns([2, 1])
-with control_col:
-    run_vehicle_simulation = st.button("▶ Run Simulation", type="primary", key="run_vehicle_simulation")
-with speed_col:
-    simulation_speed = st.selectbox("Simulation Speed", [0.5, 1, 2, 5], index=1, format_func=lambda speed: f"{speed}x", key="vehicle_simulation_speed")
 
-if run_vehicle_simulation:
-    st.session_state.vehicle_simulation = None
-    simulation_profile = get_vehicle_constraints(simulation_type)
-    roads = add_road_metadata(active["edges"])
-    present_edges = {tuple(sorted((road["a"], road["b"]))) for road in roads}
-    for base_road in scenario["edges"]:
-        key = tuple(sorted((base_road["a"], base_road["b"])))
-        if key not in present_edges:
-            roads.extend(add_road_metadata([base_road]))
-            present_edges.add(key)
-    source_speed_factor = VEHICLE_PROFILES[vehicle_type]["speed_factor"]
-    for road in roads:
-        road["speed"] = max(
-            1.0,
-            road["speed"] / source_speed_factor * simulation_profile["speed_factor"],
+@st.fragment
+def _vehicle_simulation_controls():
+    """Isolated fragment: simulation setup controls. Reruns only this section on interaction."""
+    scenario = st.session_state.get("scenario")
+    if scenario is None:
+        return
+    active = st.session_state.get("after", scenario)
+    # BUG FIX: use correct session_state keys set by _sidebar_controls
+    stops = st.session_state.get("_sidebar_stops", 12)
+    vehicles = st.session_state.get("_sidebar_vehicles", 3)
+    vehicle_type = st.session_state.get("_sidebar_vehicle_type", "Three-wheeler")
+    simulation_speed = st.session_state.get("vehicle_simulation_speed", 1)
+
+    simulation_type = st.selectbox(
+        "Vehicle Type",
+        ["2-Wheeler", "3-Wheeler", "Heavy Vehicle"],
+        key="simulation_vehicle_type",
+    )
+    location_options = list(range(min(stops, len(scenario["nodes"]) - 1) + 1))
+    location_labels = {node: name(node, stops) for node in location_options}
+    if st.session_state.get("simulation_start") not in location_options:
+        st.session_state["simulation_start"] = location_options[0]
+    start_col, destination_col = st.columns(2)
+    with start_col:
+        simulation_start = st.selectbox(
+            "Start",
+            location_options,
+            format_func=lambda node: location_labels[node],
+            key="simulation_start",
         )
-    initial_closed = set()
-    affected = active.get("affected")
-    if affected and affected.get("closed"):
-        initial_closed.add(tuple(sorted((affected["a"], affected["b"]))))
+    destination_options = [node for node in location_options if node != simulation_start]
+    if st.session_state.get("simulation_destination") not in destination_options:
+        st.session_state["simulation_destination"] = destination_options[0]
+    with destination_col:
+        simulation_destination = st.selectbox(
+            "Destination",
+            destination_options,
+            format_func=lambda node: location_labels[node],
+            key="simulation_destination",
+        )
+    control_col, speed_col = st.columns([2, 1])
+    with control_col:
+        run_vehicle_simulation = st.button("▶ Run Simulation", type="primary", key="run_vehicle_simulation")
+    with speed_col:
+        simulation_speed = st.selectbox("Simulation Speed", [0.5, 1, 2, 5], index=1, format_func=lambda s: f"{s}x", key="vehicle_simulation_speed")
+
+    if run_vehicle_simulation:
+        st.session_state.vehicle_simulation = None
+        simulation_profile = get_vehicle_constraints(simulation_type)
+        roads = add_road_metadata(active["edges"])
+        present_edges = {tuple(sorted((road["a"], road["b"]))) for road in roads}
+        for base_road in scenario["edges"]:
+            k = tuple(sorted((base_road["a"], base_road["b"])))
+            if k not in present_edges:
+                roads.extend(add_road_metadata([base_road]))
+                present_edges.add(k)
+        source_speed_factor = VEHICLE_PROFILES[vehicle_type]["speed_factor"]
         for road in roads:
-            if tuple(sorted((road["a"], road["b"]))) in initial_closed:
-                road["closed"] = True
-    roads = connect_simulation_components(
-        roads,
-        [node["id"] for node in scenario["nodes"]],
-        {node["id"]: gps(node["id"]) for node in scenario["nodes"]},
-        simulation_profile["speed_factor"],
-    )
-    valid_route = calculate_valid_route(
-        simulation_start,
-        simulation_destination,
-        simulation_type,
-        roads,
-        initial_closed,
-    )
-    if valid_route is None:
-        st.error(
-            "No valid route exists for this vehicle under the current road restrictions and closures. "
-            "Try another destination or clear the closure."
-        )
-    else:
-        st.session_state.vehicle_simulation = {
-            "nodes": scenario["nodes"],
-            "roads": roads,
-            "closed_edges": initial_closed,
-            "route": valid_route,
-            "previous_route": None,
-            "start": simulation_start,
-            "destination": simulation_destination,
-            "stops": stops,
-            "vehicle_type": simulation_type,
-            "progress": 0.0,
-            "speed": simulation_speed,
-            "running": True,
-            "paused": False,
-            "completed": False,
-            "reroutes": 0,
-            "status": "Normal",
-            "notice": "",
-        }
-
-state = st.session_state.vehicle_simulation
-if state:
-    state["speed"] = simulation_speed
-    pause_col, resume_col, reset_col = st.columns(3)
-    with pause_col:
-        if st.button("⏸ Pause", key="pause_vehicle_simulation", disabled=not state["running"]):
-            state["paused"] = True
-            state["status"] = "Paused"
-    with resume_col:
-        if st.button("▶ Resume", key="resume_vehicle_simulation", disabled=not state["paused"]):
-            state["paused"] = False
-            state["status"] = "Normal"
-    with reset_col:
-        if st.button("🔄 Reset Simulation", key="reset_vehicle_simulation"):
-            st.session_state.vehicle_simulation = None
-            state = None
-
-if state:
-    incident_controls = st.columns([2, 1, 1])
-    incident_labels = {
-        f"{name(road['a'], state['stops'])} ↔ {name(road['b'], state['stops'])} "
-        f"({road['road_class']})": tuple(sorted((road["a"], road["b"])))
-        for road in state["roads"]
-    }
-    with incident_controls[0]:
-        selected_incident = st.selectbox(
-            "Inject incident on road",
-            list(incident_labels),
-            key="vehicle_simulation_incident_road",
-        )
-    with incident_controls[1]:
-        incident_kind = st.selectbox(
-            "Incident type",
-            ["Traffic increase", "Road closure"],
-            key="vehicle_simulation_incident_kind",
-        )
-    with incident_controls[2]:
-        inject_incident = st.button(
-            "⚠️ Apply & reroute",
-            key="apply_vehicle_simulation_incident",
-            disabled=not (state["running"] or state["paused"]),
-        )
-    if inject_incident:
-        affected_edge = incident_labels[selected_incident]
-        st.info("⚠️ Traffic detected on current route. 🔄 Calculating alternate route...")
-        current_index = min(
-            int(state["progress"] + 0.5),
-            len(state["route"]) - 1,
-        )
-        current_node = state["route"][current_index]
-        for road in state["roads"]:
-            if tuple(sorted((road["a"], road["b"]))) == affected_edge:
-                if incident_kind == "Road closure":
+            road["speed"] = max(1.0, road["speed"] / source_speed_factor * simulation_profile["speed_factor"])
+        initial_closed = set()
+        affected = active.get("affected")
+        if affected and affected.get("closed"):
+            initial_closed.add(tuple(sorted((affected["a"], affected["b"]))))
+            for road in roads:
+                if tuple(sorted((road["a"], road["b"]))) in initial_closed:
                     road["closed"] = True
-                    state["closed_edges"].add(affected_edge)
-                else:
-                    road["congestion"] = min(1.0, road.get("congestion", 0.0) + 0.35)
-        alternate = calculate_valid_route(
-            current_node,
-            state["destination"],
-            state["vehicle_type"],
-            state["roads"],
-            state["closed_edges"],
+        roads = connect_simulation_components(
+            roads,
+            [node["id"] for node in scenario["nodes"]],
+            {node["id"]: gps(node["id"]) for node in scenario["nodes"]},
+            simulation_profile["speed_factor"],
         )
-        if alternate is None:
-            alternate_roads = add_vehicle_alternate_roads(
-                state["roads"],
-                [node["id"] for node in state["nodes"]],
-                {node["id"]: gps(node["id"]) for node in state["nodes"]},
-                state["vehicle_type"],
-            )
-            state["roads"].extend(alternate_roads)
-            alternate = calculate_valid_route(
-                current_node,
-                state["destination"],
-                state["vehicle_type"],
-                state["roads"],
-                state["closed_edges"],
-            )
-        state["reroutes"] += 1
-        if alternate is None:
-            state["running"] = False
-            state["paused"] = False
-            state["status"] = "No valid route"
-            state["notice"] = "No permitted alternate route is available from the current location."
+        valid_route = calculate_valid_route(simulation_start, simulation_destination, simulation_type, roads, initial_closed)
+        if valid_route is None:
+            st.error("No valid route exists for this vehicle under the current road restrictions and closures. Try another destination or clear the closure.")
         else:
-            state["previous_route"] = state["route"]
-            state["route"] = state["route"][: current_index + 1] + alternate[1:]
-            state["progress"] = float(current_index)
-            state["status"] = "Re-routed"
-            old_text = " → ".join(name(node, state["stops"]) for node in state["previous_route"])
-            new_text = " → ".join(name(node, state["stops"]) for node in state["route"])
-            state["notice"] = f"✅ New route calculated. Old route: {old_text}. New route: {new_text}."
+            st.session_state.vehicle_simulation = {
+                "nodes": scenario["nodes"], "roads": roads, "closed_edges": initial_closed,
+                "route": valid_route, "previous_route": None, "start": simulation_start,
+                "destination": simulation_destination, "stops": stops, "vehicle_type": simulation_type,
+                # Start paused so the map loads first — user presses ▶ Resume to begin
+                "progress": 0.0, "speed": simulation_speed, "running": False, "paused": True,
+                "completed": False, "reroutes": 0, "status": "Ready — press ▶ Resume to start", "notice": "",
+            }
+
+    state = st.session_state.vehicle_simulation
+    if state:
+        state["speed"] = simulation_speed
+        pause_col, resume_col, reset_col = st.columns(3)
+        with pause_col:
+            # No st.rerun() — @st.fragment reruns automatically on button click
+            if st.button("⏸ Pause", key="pause_vehicle_simulation", disabled=not state["running"] or state["paused"]):
+                state["paused"] = True
+                state["running"] = False
+                state["status"] = "Paused"
+        with resume_col:
+            # No st.rerun() — @st.fragment reruns automatically on button click
+            if st.button("▶ Resume", key="resume_vehicle_simulation", disabled=not state["paused"]):
+                state["paused"] = False
+                state["running"] = True
+                state["status"] = "Running"
+        with reset_col:
+            if st.button("🔄 Reset Simulation", key="reset_vehicle_simulation"):
+                st.session_state.vehicle_simulation = None
+                st.rerun()  # Full rerun needed to clear map
+        # Incident injection (only shown when a notice exists)
+        if state and state.get("notice") and state["roads"]:
+            incident_labels = {
+                f"{name(r['a'], stops)} ↔ {name(r['b'], stops)} ({r.get('road_class','road')})": tuple(sorted((r["a"], r["b"])))
+                for r in state["roads"]
+            }
+            inc_col, kind_col, apply_col = st.columns([2, 1, 1])
+            with inc_col:
+                selected_incident = st.selectbox("Inject incident on road", list(incident_labels), key="live_incident_road")
+            with kind_col:
+                incident_kind = st.selectbox("Incident type", ["Traffic increase", "Road closure"], key="live_incident_kind")
+            with apply_col:
+                inject_incident = st.button("⚠️ Apply & reroute", key="apply_vehicle_simulation_incident",
+                                            disabled=not (state["running"] or state["paused"]))
+            if inject_incident:
+                affected_edge = incident_labels[selected_incident]
+                current_index = min(int(state["progress"] + 0.5), len(state["route"]) - 1)
+                current_node = state["route"][current_index]
+                for road in state["roads"]:
+                    if tuple(sorted((road["a"], road["b"]))) == affected_edge:
+                        if incident_kind == "Road closure":
+                            road["closed"] = True
+                            state["closed_edges"].add(affected_edge)
+                        else:
+                            road["congestion"] = min(1.0, road.get("congestion", 0.0) + 0.35)
+                # calculate_valid_route is already imported at module level — do NOT re-import here (causes UnboundLocalError)
+                alternate = calculate_valid_route(current_node, state["destination"], state["vehicle_type"], state["roads"], state["closed_edges"])
+                if alternate is None:
+                    alt_roads = add_vehicle_alternate_roads(state["roads"], [n["id"] for n in state["nodes"]], {n["id"]: gps(n["id"]) for n in state["nodes"]}, state["vehicle_type"])
+                    state["roads"].extend(alt_roads)
+                    alternate = calculate_valid_route(current_node, state["destination"], state["vehicle_type"], state["roads"], state["closed_edges"])
+                state["reroutes"] += 1
+                if alternate is None:
+                    state["running"] = False; state["paused"] = False; state["status"] = "No valid route"
+                    state["notice"] = "No permitted alternate route available."
+                else:
+                    state["previous_route"] = state["route"]
+                    state["route"] = state["route"][:current_index + 1] + alternate[1:]
+                    state["progress"] = float(current_index); state["status"] = "Re-routed"
+                    state["notice"] = f"✅ Rerouted via {len(alternate)-1} segments."
+                # No st.rerun() — fragment auto-reruns after button click
+
+_vehicle_simulation_controls()
+
 
 @st.fragment(run_every="1s", key="vehicle-simulation-live")
 def vehicle_simulation_live():
@@ -679,9 +689,25 @@ def vehicle_simulation_live():
 
 vehicle_simulation_live()
 
+
 st.subheader(":material/map: Live Traffic & Route Map")
-route_map,osrm_used=create_map(active,stops,capacity,use_osrm);st_folium(route_map,width=1200,height=620,key=f"route-map-{st.session_state.get('map_rev',0)}",returned_objects=[])
-st.caption(f"OpenStreetMap · {CITY['name']} sample GPS · {'OSRM road geometry' if osrm_used else 'sample graph fallback'} · simulated traffic")
+route_map, osrm_used = create_map(active, stops, capacity, use_osrm)
+
+@st.fragment
+def _render_route_map(m, osrm):
+    st_folium(
+        m,
+        width="100%",
+        height=620,
+        key=f"route-map-{st.session_state.get('map_rev', 0)}",
+        returned_objects=[],
+    )
+    st.caption(
+        f"OpenStreetMap · {CITY['name']} sample GPS · "
+        f"{'OSRM road geometry' if osrm else 'sample graph fallback'} · simulated traffic"
+    )
+
+_render_route_map(route_map, osrm_used)
 
 map_tab,qpso_tab,compare_tab,benchmark_tab,reroute_tab,fleet_tab,export_tab=st.tabs(["Network & traffic","QPSO Route Optimization","QPSO vs GA vs ACO","Statistical benchmark","Dynamic rerouting","Fleet analysis","Export"])
 with map_tab:
@@ -696,42 +722,75 @@ with qpso_tab:
         for vehicle,route in enumerate(active["routes"],1):st.info(f"Vehicle {vehicle}: "+" → ".join(name(node,stops) for node in route))
     with b:st.line_chart(pd.DataFrame({"Best fitness":active["convergence"]}),height=300)
 with compare_tab:
-    with st.spinner("Evaluating QPSO, GA, and ACO..."):outputs,comparison=compare_algorithms(scenario["nodes"],scenario["edges"],scenario["routes"],scenario["runtime_ms"],stops,vehicles,iterations,int(seed))
-    st.dataframe(comparison,hide_index=True,width="stretch");c1,c2=st.columns(2)
-    with c1:st.bar_chart(comparison.set_index("Algorithm")["Fitness"],height=260)
-    with c2:st.bar_chart(comparison.set_index("Algorithm")["Distance (km)"],height=260)
+    # Cache the comparison so clicking this tab doesn't recompute every time
+    _compare_key = f"_compare_cache_{st.session_state.get('map_rev', 0)}"
+    if _compare_key not in st.session_state:
+        with st.spinner("Evaluating QPSO, GA, and ACO..."):
+            _, _cached_comparison = compare_algorithms(
+                scenario["nodes"], scenario["edges"], scenario["routes"],
+                scenario["runtime_ms"], stops, vehicles, iterations, int(seed)
+            )
+        st.session_state[_compare_key] = _cached_comparison
+    comparison = st.session_state[_compare_key]
+    st.dataframe(comparison, hide_index=True, width="stretch")
+    c1, c2 = st.columns(2)
+    with c1: st.bar_chart(comparison.set_index("Algorithm")["Fitness"], height=260)
+    with c2: st.bar_chart(comparison.set_index("Algorithm")["Distance (km)"], height=260)
     st.caption("Fitness combines travel time, distance, and traffic; results are measured rather than assumed.")
 with benchmark_tab:
-    runs=st.number_input("Benchmark runs",2,10,3)
-    if st.button("Run QPSO / GA / ACO benchmark",key="benchmark_run"):
-        observations={key:[] for key in ["QPSO","GA","ACO"]}
-        with st.spinner("Running repeated seeds..."):
-            for offset in range(int(runs)):
-                sample=simulate(stops,vehicles,capacity,vehicle_type,traffic,min(iterations,60),int(seed)+offset)
-                _,table=compare_algorithms(sample["nodes"],sample["edges"],sample["routes"],sample["runtime_ms"],stops,vehicles,min(iterations,60),int(seed)+offset)
-                for _,row in table.iterrows():observations[row["Algorithm"]].append(float(row["Fitness"]))
-        st.session_state.benchmark_table=pd.DataFrame([{"Algorithm":k,"Mean fitness":round(sum(v)/len(v),2),"Best":round(min(v),2),"Worst":round(max(v),2),"Std. dev.":round(pd.Series(v).std(),2)} for k,v in observations.items()])
-    if "benchmark_table" in st.session_state:
-        st.dataframe(st.session_state.benchmark_table,hide_index=True,width="stretch")
-        st.bar_chart(st.session_state.benchmark_table.set_index("Algorithm")["Mean fitness"])
-    else:st.info("Run repeated seeds to compare QPSO, GA, and ACO.")
+    @st.fragment
+    def _benchmark_tab():
+        runs = st.number_input("Benchmark runs", 2, 10, 3)
+        if st.button("Run QPSO / GA / ACO benchmark", key="benchmark_run"):
+            observations = {k: [] for k in ["QPSO", "GA", "ACO"]}
+            with st.spinner("Running repeated seeds..."):
+                for offset in range(int(runs)):
+                    sample = simulate(stops, vehicles, capacity, vehicle_type, traffic, min(iterations, 60), int(seed) + offset)
+                    _, table = compare_algorithms(sample["nodes"], sample["edges"], sample["routes"], sample["runtime_ms"], stops, vehicles, min(iterations, 60), int(seed) + offset)
+                    for _, row in table.iterrows():
+                        observations[row["Algorithm"]].append(float(row["Fitness"]))
+            st.session_state.benchmark_table = pd.DataFrame([{"Algorithm": k, "Mean fitness": round(sum(v) / len(v), 2), "Best": round(min(v), 2), "Worst": round(max(v), 2), "Std. dev.": round(pd.Series(v).std(), 2)} for k, v in observations.items()])
+        if "benchmark_table" in st.session_state:
+            st.dataframe(st.session_state.benchmark_table, hide_index=True, width="stretch")
+            st.bar_chart(st.session_state.benchmark_table.set_index("Algorithm")["Mean fitness"])
+        else:
+            st.info("Run repeated seeds to compare QPSO, GA, and ACO.")
+    _benchmark_tab()
 with reroute_tab:
-    choices={"Auto-select highest-impact road":None}
-    for e in scenario["edges"]:choices[f"{name(e['a'],stops)} ↔ {name(e['b'],stops)}"]=(e["a"],e["b"])
-    selected=st.selectbox("Incident road",list(choices));increase=st.slider("Traffic increase",1,5,3);left,right=st.columns(2)
-    with left:incident=st.button("Simulate traffic incident",key="incident")
-    with right:closure=st.button("Simulate road closure",key="closure")
-    if incident or closure:
-        edge=choices[selected]
-        if edge is None:
-            e=max(scenario["edges"],key=lambda item:item["congestion"]*item["distance"]);edge=(e["a"],e["b"])
-        st.session_state.after=simulate(stops,vehicles,capacity,vehicle_type,traffic,iterations,int(seed),edge,increase,closure);st.session_state.map_rev=st.session_state.get("map_rev",0)+1;st.rerun()
-    if "after" in st.session_state:
-        after=st.session_state.after;impact=after["affected"];old=level(impact["before_congestion"]);new="Blocked" if impact["closed"] else level(impact["after_congestion"])
-        st.warning(f"Affected road: {name(impact['a'],stops)} ↔ {name(impact['b'],stops)} · traffic {old} → {new}; rerouting triggered.")
-        before,after_metric=scenario["metrics"],after["metrics"]
-        st.dataframe(pd.DataFrame([{"Metric":"Fitness","Before":round(before["time"]+.18*before["distance"]+18*before["congestion"],2),"After":round(after_metric["time"]+.18*after_metric["distance"]+18*after_metric["congestion"],2)},{"Metric":"Distance","Before":before["distance"],"After":after_metric["distance"]},{"Metric":"Traffic cost","Before":before["congestion"],"After":after_metric["congestion"]}]),hide_index=True,width="stretch")
-        st.success("Route automatically updated because traffic conditions changed.")
+    @st.fragment
+    def _reroute_tab():
+        choices = {"Auto-select highest-impact road": None}
+        for e in scenario["edges"]:
+            choices[f"{name(e['a'], stops)} ↔ {name(e['b'], stops)}"] = (e["a"], e["b"])
+        selected = st.selectbox("Incident road", list(choices))
+        increase = st.slider("Traffic increase", 1, 5, 3)
+        left, right = st.columns(2)
+        with left:
+            incident = st.button("Simulate traffic incident", key="incident")
+        with right:
+            closure = st.button("Simulate road closure", key="closure")
+        if incident or closure:
+            edge = choices[selected]
+            if edge is None:
+                e = max(scenario["edges"], key=lambda item: item["congestion"] * item["distance"])
+                edge = (e["a"], e["b"])
+            st.session_state.after = simulate(stops, vehicles, capacity, vehicle_type, traffic, iterations, int(seed), edge, increase, closure)
+            st.session_state.map_rev = st.session_state.get("map_rev", 0) + 1
+            st.rerun()
+        if "after" in st.session_state:
+            after = st.session_state.after
+            impact = after["affected"]
+            old = level(impact["before_congestion"])
+            new = "Blocked" if impact["closed"] else level(impact["after_congestion"])
+            st.warning(f"Affected road: {name(impact['a'], stops)} ↔ {name(impact['b'], stops)} · traffic {old} → {new}; rerouting triggered.")
+            before, after_metric = scenario["metrics"], after["metrics"]
+            st.dataframe(pd.DataFrame([
+                {"Metric": "Fitness", "Before": round(before["time"] + .18 * before["distance"] + 18 * before["congestion"], 2), "After": round(after_metric["time"] + .18 * after_metric["distance"] + 18 * after_metric["congestion"], 2)},
+                {"Metric": "Distance", "Before": before["distance"], "After": after_metric["distance"]},
+                {"Metric": "Traffic cost", "Before": before["congestion"], "After": after_metric["congestion"]},
+            ]), hide_index=True, width="stretch")
+            st.success("Route automatically updated because traffic conditions changed.")
+    _reroute_tab()
 with fleet_tab:
     fleet=route_table(active["routes"],capacity,stops,active["edges"],active["nodes"]);st.dataframe(fleet,hide_index=True,width="stretch")
     if not fleet.empty:
@@ -740,6 +799,21 @@ with fleet_tab:
     st.subheader("Constraint validation")
     st.dataframe(pd.DataFrame([{"Constraint":"Depot start / return","Status":"PASS" if all(r[0]==0 and r[-1]==0 for r in active["routes"]) else "CHECK"},{"Constraint":"Delivery coverage","Status":"PASS" if len(served)==stops else "CHECK"},{"Constraint":"Vehicle limit","Status":"PASS" if len(active["routes"])<=vehicles else "CHECK"},{"Constraint":"Estimated capacity","Status":"PASS" if fleet.empty or (fleet["Load"]<=fleet["Capacity"]).all() else "CHECK"}]),hide_index=True,width="stretch")
 with export_tab:
-    _,comparison=compare_algorithms(scenario["nodes"],scenario["edges"],scenario["routes"],scenario["runtime_ms"],stops,vehicles,iterations,int(seed));st.dataframe(comparison,hide_index=True,width="stretch")
-    data=io.StringIO();comparison.to_csv(data,index=False);st.download_button("Download QPSO / GA / ACO results",data.getvalue(),"algorithm_results.csv","text/csv")
-    routes=io.StringIO();route_table(scenario["routes"],capacity,stops,scenario["edges"],scenario["nodes"]).to_csv(routes,index=False);st.download_button("Download QPSO vehicle routes",routes.getvalue(),"vehicle_routes.csv","text/csv")
+    # Reuse cached comparison from compare_tab if available, else compute once
+    _compare_key = f"_compare_cache_{st.session_state.get('map_rev', 0)}"
+    if _compare_key not in st.session_state:
+        with st.spinner("Preparing export data..."):
+            _, _exp_comparison = compare_algorithms(
+                scenario["nodes"], scenario["edges"], scenario["routes"],
+                scenario["runtime_ms"], stops, vehicles, iterations, int(seed)
+            )
+        st.session_state[_compare_key] = _exp_comparison
+    comparison = st.session_state[_compare_key]
+    st.dataframe(comparison, hide_index=True, width="stretch")
+    data = io.StringIO()
+    comparison.to_csv(data, index=False)
+    st.download_button("⬇ Download QPSO / GA / ACO results", data.getvalue(), "algorithm_results.csv", "text/csv")
+    routes_csv = io.StringIO()
+    route_table(scenario["routes"], capacity, stops, scenario["edges"], scenario["nodes"]).to_csv(routes_csv, index=False)
+    st.download_button("⬇ Download QPSO vehicle routes", routes_csv.getvalue(), "vehicle_routes.csv", "text/csv")
+
