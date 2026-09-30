@@ -42,6 +42,37 @@ The dashboard's **Vehicle Route Simulation** section supports 2-wheelers,
 3-wheelers, and heavy vehicles; use its pause/resume/reset and incident controls
 to demonstrate live movement and vehicle-safe rerouting.
 
+## Deploy
+
+### Vercel
+
+Vercel serves the Flask web app in `app.py` and uses the included `vercel.json`.
+Connect this repository to Vercel, or deploy from the project root with the
+Vercel CLI:
+
+```bash
+npx vercel
+npx vercel --prod
+```
+
+The Vercel deployment provides the interactive web experience at `/` and the
+optimization API at `/api/optimize`.
+
+### Streamlit Community Cloud
+
+For the dashboard and vehicle simulation, create a Streamlit Community Cloud
+deployment using `routepulse_streamlit.py` as the main file. The repository's
+`requirements.txt` contains the dashboard dependencies.
+
+### GitHub
+
+```bash
+git add .
+git commit -m "Prepare deployment"
+git branch -M main
+git push -u origin main
+```
+
 ## Demo flow
 
 1. Set 12–20 delivery locations and 3 vehicles.
