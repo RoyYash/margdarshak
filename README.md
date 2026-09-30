@@ -1,46 +1,84 @@
 
-# 🧭 MARGDARSHAK
+# MARGDARSHAK
 
-**Smart Traffic & Route Guidance System**
+Smart Traffic & Route Guidance System with vehicle-aware routing, live traffic
+simulation, and intelligent rerouting.
 
-A smart traffic-management prototype with vehicle-aware routes, live traffic simulation, and intelligent rerouting.
+This repository contains two interfaces backed by the same routing prototype:
 
-The routing dashboard retains its QPSO-inspired optimization algorithm, alongside the GA and ACO comparison.
+- A Flask web app with a browser UI and JSON optimization API.
+- A Streamlit operations dashboard with maps, algorithm comparisons, and vehicle simulation.
 
-## What it demonstrates
+## Features
 
-- Weighted transportation graph
-- Dynamic traffic scenarios
-- Practical discrete QPSO-inspired search
-- Multi-objective fitness: travel time + distance + congestion
-- Route visualization
-- Classical greedy baseline
-- Convergence chart
-- "Simulate Accident" -> re-optimization
-- Benchmark dashboard
-- Vehicle-specific route simulation with road restrictions, animated map movement, and incident rerouting
+- Weighted transportation graph with dynamic traffic scenarios
+- QPSO-inspired route optimization
+- Greedy baseline, GA, and ACO comparison
+- Multi-objective scoring using travel time, distance, and congestion
+- Route visualization with optional OSRM road geometry
+- Accident simulation and route re-optimization
+- Vehicle-specific road restrictions and rerouting
+
+## Requirements
+
+- Python 3.10 or newer
+- Network access is optional. The Streamlit dashboard falls back to synthetic route geometry when OSRM is unavailable.
 
 ## Run locally
 
-Python 3.10+ recommended.
+Create and activate a virtual environment, then install the dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
+# macOS/Linux
+source .venv/bin/activate
+# Windows PowerShell
+.\\.venv\\Scripts\\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+### Flask web app
+
+```bash
 python app.py
 ```
-## admin id & password (for demo use)
-email: admin
-password:admin123
 
-Run the Streamlit traffic-management dashboard in a separate terminal:
+Open `http://localhost:5000`. The API endpoint is `POST /api/optimize`.
+
+### Streamlit dashboard
+
+Run this in a separate terminal:
 
 ```bash
 python -m streamlit run routepulse_streamlit.py
 ```
 
-The dashboard's **Vehicle Route Simulation** section supports 2-wheelers,
-3-wheelers, and heavy vehicles; use its pause/resume/reset and incident controls
-to demonstrate live movement and vehicle-safe rerouting.
+Open `http://localhost:8501`. The demo login is `admin` / `admin123`.
+
+The **Vehicle Route Simulation** section supports 2-wheelers, 3-wheelers, and
+heavy vehicles, with pause, resume, reset, incident, and vehicle-safe rerouting
+controls.
+
+## Test
+
+Run the unit tests from the repository root:
+
+```bash
+python -m unittest -v
+```
+
+GitHub Actions runs this test suite for pushes and pull requests to `main`.
+
+## Project layout
+
+```text
+app.py                   Flask app, routing algorithms, and API
+routepulse_streamlit.py  Streamlit dashboard
+vehicle_simulation.py    Vehicle constraints and route simulation helpers
+test_vehicle_simulation.py
+templates/index.html     Flask web interface
+requirements.txt         Python dependencies
+```
 
 ## Deploy
 
@@ -55,23 +93,15 @@ npx vercel
 npx vercel --prod
 ```
 
-The Vercel deployment provides the interactive web experience at `/` and the
-optimization API at `/api/optimize`.
+The Vercel deployment provides the Flask web experience at `/` and the
+optimization API at `/api/optimize`. Streamlit should be deployed separately
+with Streamlit Community Cloud.
 
 ### Streamlit Community Cloud
 
 For the dashboard and vehicle simulation, create a Streamlit Community Cloud
 deployment using `routepulse_streamlit.py` as the main file. The repository's
 `requirements.txt` contains the dashboard dependencies.
-
-### GitHub
-
-```bash
-git add .
-git commit -m "Prepare deployment"
-git branch -M main
-git push -u origin main
-```
 
 ## Demo flow
 
@@ -82,7 +112,7 @@ git push -u origin main
 5. Click SIMULATE ACCIDENT.
 6. Explain that a congested edge is injected and the optimizer recomputes the route.
 
-## Important
+## Notes
 
 This is a hackathon prototype, not a production routing engine. The QPSO module is a discrete, quantum-inspired implementation designed for an interactive demo. For the final submission, benchmark it against OR-Tools and the supplied dataset and report actual experimental results.
 
