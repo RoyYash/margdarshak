@@ -1,0 +1,15 @@
+[theme]
+base = "light"
+primaryColor = "#16818a"
+backgroundColor = "#f4f8f8"
+secondaryBackgroundColor = "#eef7f7"
+textColor = "#193642"
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+
+[browser]
+# Prevents page from re-scrolling to top on every rerun
+gatherUsageStats = false
